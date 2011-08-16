@@ -2,74 +2,51 @@ package com.bitsend.evogene;
 
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL10;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.bitsend.evogene.agents.Agent;
-import com.bitsend.evogene.agents.Bug;
+import com.badlogic.gdx.Screen;
+import com.bitsend.evogene.screen.GameScreen;
 
 public class Game implements ApplicationListener {
-	private SpriteBatch batch;
-	private World world;
+	public final static int HEIGHT = 800;
+	public final static int WIDTH = 1200;
+	Screen screen;
+
+    public Screen getStartScreen() {
+        return new GameScreen(this);
+    }
+    
+	public void setScreen (Screen sc) {
+		screen.pause();
+		screen.dispose();
+		screen = sc;
+	}
 	
 	public void create() {
-		batch = new SpriteBatch();
-		world = new World();
-		//populate(100, 20);
+		Assets.load();
+		
+		screen = getStartScreen();
 	}
 
 	public Game() {
-		//create();
-		
-	}
-		
-	public void populate(int numFood, int numBugs) {
-		
-		while (numFood>0) {
-			int x = (int)(Math.random() * world.worldWidth);
-			int y = (int)(Math.random() * world.worldHeight);
-	
-			if (world.getContents(x, y) == null) {
-				world.addAgent(x, y, new Agent((float)x, (float)y, 0f));
-				numFood--;
-			}
-		}
-		
-		while (numBugs>0) {
-			int x = (int)(Math.random() * world.worldWidth);
-			int y = (int)(Math.random() * world.worldHeight);
-	
-			if (world.getContents(x, y) == null) {
-				world.addAgent(x, y, new Bug((float)x, (float)y, 0f, 1));
-				numBugs--;
-			}
-		}
-		//int x = 1;
-		//int y = 1;
-		//world.addAgent(x, y, new Bug((float)x, (float)y, 0f, 1));
-	}
-	
-	
-	public void render() {
-		Gdx.gl.glClearColor(1f, 1f, 1f, 0f);
-		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
-		Gdx.gl.glEnable(GL10.GL_BLEND);
-		Gdx.gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
-		Gdx.graphics.getGL10().glEnable(GL10.GL_TEXTURE_2D);
-		batch.begin();
-		world.update();
-		world.render(batch);
-		batch.end();
+
 	}
 
 	public void resize(int width, int height) {
 	}
 
 	public void pause() {
+		screen.pause();
 	}
 
 	public void resume() {
+		screen.resume();
 	}
 
 	public void dispose() {
+		screen.dispose();
+	}
+
+	@Override
+	public void render() {
+		screen.render(Gdx.graphics.getDeltaTime());
 	}
 }

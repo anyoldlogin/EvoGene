@@ -3,6 +3,7 @@ package com.bitsend.evogene;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.bitsend.evogene.agents.Agent;
 
@@ -35,24 +36,32 @@ public class World {
 	public void create() {
 		places = new ArrayList<Place>();
 		agents = new ArrayList<Agent>();
-		for(int x=0; x<this.worldWidth; x++) {
-			for(int y=0; y<this.worldHeight; y++ ) {
+		for (int x = 0; x < this.worldWidth + 1; x++) {
+			for (int y = 0; y < this.worldHeight + 1; y++) {
 				places.add(new Place(x, y));
 			}
 		}
 	}
 
-	public void update() {
+
+	public void update(float delta) {
 		for (Place place : places) {
 			if (place.contents != null) {
-				place.contents.update(this);
+				Agent contents = place.contents;
+				if (!contents.isAlive()) {
+					resetContents(
+							(int) contents.position.x, 
+							(int) contents.position.y
+					);
+				}
+				place.contents.update(this, delta);
 			}
-			
+
 		}
 	}
 
 	public void render(SpriteBatch batch) {
-		
+
 		for (Place place : places) {
 			place.render(batch, this.cellWidth, this.cellHeight);
 		}
@@ -84,6 +93,11 @@ public class World {
 		agent.setPosition(x, y);
 	}
 
+	public void removeAgent(Agent agent) {
+		resetContents((int) agent.position.x, (int) agent.position.y);
+		agents.remove(agent);
+	}
+
 	public int rotateX(int x) {
 		if (x < 0) {
 			return this.worldWidth;
@@ -104,19 +118,34 @@ public class World {
 
 	}
 
+	protected int coordToIndex(int x, int y) {
+		int index = (y * worldHeight + x);
+		Gdx.app.log("CoordToCoord", "CoordToIndex: (" + x + ", " + y + ") => "
+				+ index);
+
+		return index;
+	}
+
 	public Agent getContents(int x, int y) {
-		return places.get((y * worldHeight) + x).contents;
+		int index = coordToIndex(x, y);
+		if (index < places.size()) {
+			return places.get(coordToIndex(x, y)).contents;
+		}
+		return null;
 	}
 
 	public void setContents(int x, int y, Agent agent) {
-		places.get((y * worldWidth) + x).contents = agent;
+		places.get(coordToIndex(x, y)).contents = agent;
 		agent.setPosition(x, y);
 		if (agent != null) {
-			if (agents == null) {
-				agents = new ArrayList<Agent>();
-			}
 			agents.add(agent);
 		}
+	}
+
+	public void resetContents(int x, int y) {
+		Agent contents = places.get(coordToIndex(x, y)).contents;
+		places.get(coordToIndex(x, y)).contents = null;
+		agents.remove(contents);
 	}
 
 }
