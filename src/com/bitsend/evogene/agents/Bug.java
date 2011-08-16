@@ -38,7 +38,7 @@ public class Bug extends Agent {
 				int nextY = (int) position.y + dir.getYDelta();
 				if (world.inWorld(nextX, nextY)) {
 					Agent agent = world.getContents(nextX, nextY);
-					if (agent instanceof Agent) {
+					if (agent instanceof Food) {
 						eat(world,agent);
 						moveTo(nextX, nextY);
 						searching = false;
